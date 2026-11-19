@@ -1941,7 +1941,7 @@ window.__cdbLogos={"banque-populaire":"data:image/png;base64,iVBORw0KGgoAAAANSUh
  var root=document.querySelector('.mrcdb.v2');
  if(!root||!window.MoteurBanque||!window.__cdbBanques)return;
  var BANQUES=window.__cdbBanques,LOGOS=window.__cdbLogos||{},M=window.MoteurBanque;
- var WORKER_PRET=false; /* la branche « changer-de-banque » du Worker n'existe pas encore : rien n'est envoyé avant son déploiement */
+ var WORKER_PRET=true; /* branche « changer-de-banque » du Worker (19/11/2026) */
  var WORKER='https://mric-rapport-impots.lingering-frost-26a0.workers.dev';
  var GO={boursobank:'boursorama',fortuneo:'fortuneo',monabanq:'monabanq',bforbank:'bforbank','hello-bank':'hellobank',revolut:'revolut',deblock:'deblock','trade-republic':'trade-republic',n26:'n26',wise:'wise',nickel:'nickel',bunq:'bunq','green-got':'greengot',lcl:'lcl','bnp-paribas':'bnp-paribas',sumeria:'sumeria'};
  var FAMILLES=[['traditionnelle','Banques traditionnelles'],['banque_en_ligne','Banques en ligne'],['neobanque','Néobanques et comptes de paiement']];
@@ -2191,10 +2191,10 @@ window.__cdbLogos={"banque-populaire":"data:image/png;base64,iVBORw0KGgoAAAANSUh
   if(!$('cdb-lead-rgpd').checked){status.textContent='Cochez la case pour recevoir votre comparatif.';return;}
   if(!WORKER_PRET){status.textContent='L’envoi par email n’est pas encore ouvert.';return;}
   var payload={email:email,prenom:'',consent:true,consentTimestamp:new Date().toISOString(),calculator:'changer-de-banque',company:$('cdb-lead-company').value,inputs:P,
-   results:{verdict:R.verdict,actuelle:{banque:R.actuelle.banque,formule:R.actuelle.formule,total:R.actuelle.total,lignes:R.actuelle.lignes},
-    classement:R.classement.map(function(c){return {banque:c.banque,nom_banque:c.nom_banque,formule:c.nom,total:c.total,economie:c.economie,pertes:c.pertes};}),
-    meme_banque:R.meme_banque&&{nom:R.meme_banque.nom,total:R.meme_banque.total},complement:R.complement&&{garder:R.complement.garder.nom,ajouter:R.complement.ajouter.nom_banque,total:R.complement.total},exclues:R.exclues,hypotheses:hypUser},
-   meta:{version:'v3',page:location.href,estimation:!!P.estimation}};
+   results:{verdict:R.verdict,actuelle:{banque:R.actuelle.banque,nom_banque:R.actuelle.nom_banque,formule:R.actuelle.formule,nom:R.actuelle.nom,total:R.actuelle.total,lignes:R.actuelle.lignes,declare:!!R.actuelle.declare,cout_calcule:R.actuelle.cout_calcule},
+    classement:R.classement.map(function(c){return {banque:c.banque,nom_banque:c.nom_banque,formule:c.formule,nom:c.nom,total:c.total,economie:c.economie,pertes:c.pertes,fiche:c.fiche,type:c.type,go:GO[c.banque]||null};}),
+    meme_banque:R.meme_banque&&{nom:R.meme_banque.nom,total:R.meme_banque.total,economie:R.meme_banque.economie},complement:R.complement&&{garder:R.complement.garder.nom,ajouter:R.complement.ajouter.nom_banque,total:R.complement.total,economie:R.complement.economie},exclues:R.exclues,hypotheses:hypUser},
+   meta:{version:'v3',page:location.href,estimation:!!P.estimation,src:(function(){try{return (new URLSearchParams(location.search).get('src')||'').slice(0,48)}catch(e){return ''}})()}};
   var btn=$('cdb-lead-submit');btn.disabled=true;status.textContent='Envoi en cours…';
   fetch(WORKER,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}).then(function(r){
    if(r.status===422)return r.json().then(function(j){status.textContent=j&&j.suggestion?'Vouliez-vous dire '+j.suggestion+' ?':'Cette adresse ne semble pas pouvoir recevoir d’email.';btn.disabled=false;});
